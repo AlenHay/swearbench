@@ -70,7 +70,7 @@ def svg(res):
          f"<style>{STYLE}</style>",
          '<title id="t">SwearBench: how much swearing gets you what result</title>',
          '<desc id="d">' + escape("; ".join(f'{p["model"]}: rage {p["rage100"]:.0f} per 100 turns, '
-                                            f'{p["outcome"]:.0f}% of sessions land' for p in pts)) + "</desc>",
+                                            f'ships {p["outcome"]:.0f}%' for p in pts)) + "</desc>",
          f'<rect width="{W}" height="{H}" rx="14" fill="var(--surface)"/>',
          f'<text x="{PAD}" y="{PAD + 18}" font-size="20" font-weight="700" fill="var(--ink)">'
          'Swearing vs. result</text>']
@@ -100,7 +100,7 @@ def svg(res):
         col = f"var(--s{family(p['model']) + 1})"
         lo, hi = p.get("outcome_ci", (p["outcome"], p["outcome"]))
         tip = escape(f'{p["model"]}\nrage {p["rage100"]:.0f}/100 turns · {p["angry_pct"]:.0f}% angry msgs\n'
-                     f'{p["outcome"]:.0f}% of {p["sessions"]} sessions land (90% CI {lo:.0f}–{hi:.0f}%)\n'
+                     f'ships {p["outcome"]:.0f}% of {p["decided"]} decided sessions (90% CI {lo:.0f}–{hi:.0f}%)\n'
                      f'SwearBench {p["score"]:.1f}')
         o.append(f'<g><title>{tip}</title>'
                  f'<line x1="{cx:.1f}" x2="{cx:.1f}" y1="{Y(hi):.1f}" y2="{Y(lo):.1f}" stroke="{col}" stroke-width="2" '

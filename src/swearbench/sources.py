@@ -20,6 +20,7 @@ class Reaction:
     text: str
     prev_reply: str
     model: str
+    workspace: str = ""
 
 
 @dataclass
@@ -65,6 +66,16 @@ def norm(model):
     return model
 
 
+def workspace_of(path):
+    """Repo-level key for a working directory; worktrees of one repo share it."""
+    if not path:
+        return ""
+    parts = path.rstrip("/").split("/")
+    if "worktrees" in parts and parts.index("worktrees") + 1 < len(parts):
+        return parts[parts.index("worktrees") + 1]
+    return parts[-1]
+
+
 def ms_to_iso(ms):
     import datetime
     return datetime.datetime.fromtimestamp(ms / 1000, datetime.timezone.utc).isoformat().replace("+00:00", "Z")
@@ -108,6 +119,7 @@ def read_claude(corpus, root, skip_session=lambda entrypoint: False, exclude_dir
         entrypoint = None
         model = None
         reply = ""
+        cwd = ""
         usage = {}
         pending = []
         for d in _jsonl(path):
@@ -123,6 +135,7 @@ def read_claude(corpus, root, skip_session=lambda entrypoint: False, exclude_dir
                     reply = text
             elif kind == "user" and not d.get("isSidechain") and not d.get("isMeta"):
                 entrypoint = entrypoint or d.get("entrypoint")
+                cwd = cwd or d.get("cwd", "")
                 text = _claude_text(msg.get("content") or "")
                 if not text or d.get("promptSource") == "system":
                     continue
@@ -134,7 +147,7 @@ def read_claude(corpus, root, skip_session=lambda entrypoint: False, exclude_dir
                 if text.startswith(("<", "Caveat:")) or not model:
                     continue
                 pending.append(Reaction(d.get("uuid", ""), "claude", path, d.get("timestamp", ""), text,
-                                        reply[-900:], norm(model)))
+                                        reply[-900:], norm(model), workspace_of(cwd)))
                 reply = ""
         headless = entrypoint in HEADLESS_ENTRYPOINTS
         human = not (subagent or headless or excluded)
@@ -156,7 +169,7 @@ def read_codex(corpus, root, skip_originator=lambda originator: False):
         return
     corpus.found.append(f"Codex: {len(files)} sessions")
     for path in files:
-        human, skip, model, reply = False, False, None, ""
+        human, skip, model, reply, cwd = False, False, None, "", ""
         for d in _jsonl(path):
             p = d.get("payload") or {}
             kind = d.get("type")
@@ -164,6 +177,7 @@ def read_codex(corpus, root, skip_originator=lambda originator: False):
                 source = p.get("source")
                 human = isinstance(source, str) and source != "exec" and p.get("originator") != "codex_exec"
                 skip = skip_originator(p.get("originator") or "")
+                cwd = p.get("cwd") or ""
             elif kind == "turn_context":
                 model = p.get("model") or model
             elif kind == "event_msg":
@@ -174,7 +188,8 @@ def read_codex(corpus, root, skip_originator=lambda originator: False):
                     text = (p.get("message") or "").strip()
                     if text and not text.startswith("<"):
                         corpus.reactions.append(Reaction(f"{path}:{d.get('timestamp')}", "codex", path,
-                                                         d.get("timestamp", ""), text, reply[-900:], norm(model)))
+                                                         d.get("timestamp", ""), text, reply[-900:], norm(model),
+                                                         workspace_of(cwd)))
                     reply = ""
                 elif t == "turn_aborted" and human and not skip and model:
                     corpus.interrupts.append(Interrupt("codex", path, d.get("timestamp", ""), norm(model)))
@@ -193,6 +208,7 @@ def read_opencode(corpus, db, skip_sessions=frozenset()):
     c = _ro(db)
     try:
         sessions = dict(c.execute("select id, parent_id from session"))
+        dirs = dict(c.execute("select id, directory from session"))
     except sqlite3.Error:
         return
     corpus.found.append(f"OpenCode: {len(sessions)} sessions")
@@ -219,7 +235,8 @@ def read_opencode(corpus, db, skip_sessions=frozenset()):
             state[sid] = (model, text or reply)
         elif d.get("role") == "user":
             if human and model and text and sid not in skip_sessions:
-                corpus.reactions.append(Reaction(mid, "opencode", sid, ts, text, reply[-900:], norm(model)))
+                corpus.reactions.append(Reaction(mid, "opencode", sid, ts, text, reply[-900:], norm(model),
+                                                 workspace_of(dirs.get(sid))))
             state[sid] = (model, "")
 
 
@@ -250,6 +267,7 @@ def read_t3(corpus, db):
     for mid, payload in c.execute("select json_extract(payload_json,'$.messageId'), payload_json from orchestration_events "
                                   "where event_type='thread.turn-start-requested'"):
         turn_model[mid] = (json.loads(payload).get("modelSelection") or {}).get("model")
+    project = dict(c.execute("select thread_id, project_id from projection_threads"))
     by_thread = defaultdict(list)
     for mid, tid, role, text, ts in c.execute("select message_id, thread_id, role, text, created_at from projection_thread_messages "
                                               "where role in ('user','assistant') order by created_at"):
@@ -264,7 +282,8 @@ def read_t3(corpus, db):
                 reply = text if text.strip() else reply
                 continue
             if current and text.strip():
-                corpus.reactions.append(Reaction(mid, "t3", tid, ts, text.strip(), reply[-900:], norm(current)))
+                corpus.reactions.append(Reaction(mid, "t3", tid, ts, text.strip(), reply[-900:], norm(current),
+                                                 project.get(tid) or ""))
             current = turn_model.get(mid) or current
             sent[tid].append((ts, current))
             reply = ""

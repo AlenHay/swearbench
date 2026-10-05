@@ -12,7 +12,7 @@ import tempfile
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-RUBRIC_VERSION = "1"
+RUBRIC_VERSION = "2"
 CACHE = os.path.join(os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache")), "swearbench", "labels.jsonl")
 
 RUBRIC = """You are labelling a developer's chat messages to AI coding agents, to measure how frustrated
@@ -37,6 +37,10 @@ Return ONLY a JSON array, one object per item, same order:
     // "slow"       too slow, too many questions, too verbose, wasted time
     // "sarcasm"    sarcastic/passive-aggressive phrasing
     // "giving_up"  abandons the model/approach, "I'll do it myself", "forget it", threatens to switch
+    // "taste"      subjective critique while iterating on look/feel/wording ("looks lame", "too much text");
+    //              the work does what was asked, the developer just doesn't like it yet
+ "blames_earlier": bool,   // msg complains that something done BEFORE the AI's last reply (earlier merged/shipped work,
+                           // a previous session) is broken, missing or wrong, rather than the last reply itself
  "satisfaction": -2..2,    // -2 rejects the work, -1 wants fixes, 0 neutral/new task, 1 accepts, 2 explicit praise/delight
  "quote": str              // <=80 char excerpt that best shows the anger (or "" if anger==0)
 }

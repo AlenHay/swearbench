@@ -59,20 +59,35 @@ Every message you send is charged to the model whose reply you were answering. T
   | regression (broke what worked) | 2.5 | | shouting | 0.5 |
   | ignored an instruction | 2 | | sarcasm | 0.5 |
   | made you repeat yourself | 2 | | slow / verbose | 0.5 |
+  | | | | taste (critique while iterating on looks) | 0.5 |
 
 - **satisfaction** −2 (rejects the work) to +2 (praise)
+- whether it **blames earlier work** (something shipped before the last reply is broken or missing)
 
-Rage for a message = anger + mode weights, when aimed at the model. Each interrupt adds 1.5.
+Rage for a message is built to match how it felt, not how often it happened:
+
+- **Severity beats frequency.** Rage = anger² + mode weights, so one 4/4 blowup (16) outweighs four
+  1/4 grumbles (4). The report counts 4/4 blowups per model.
+- **Taste isn't failure.** "That looks lame" while iterating on a design, with no broken rule, lie,
+  regression or ignored instruction, counts a quarter.
+- **Regret goes to whoever caused it.** A complaint about earlier work ("why did X disappear") is charged to
+  the models that worked in the same repo in the week before, split by how many turns each had there, not
+  to the model that happens to be fixing it.
+- Each interrupt adds 1.5.
 
 The headline is half friction, half result:
 
 ```
-Friction   = clean-turn % − 0.5 × rage per 100 turns + 10 × average satisfaction
-Ships      = % of sessions whose last reaction accepts the work
+Friction   = 100 − 0.25 × rage per 100 turns + 10 × average satisfaction
+Ships      = accepted ÷ (accepted + rejected) sessions
 SwearBench = (Friction + Ships) / 2
 ```
 
-A clean turn is one where your next message carries no anger at the model and doesn't reject its work.
+Friction deliberately ignores how *often* you were annoyed (a model you use for lots of quick "merge it"
+turns would look calm by volume alone); it only counts how much rage piled up per turn.
+A session's verdict is your last reaction in it. Sessions that stop or move to another model without a
+verdict (usage limits, "pick up the work" in a new thread) are left out of Ships rather than counted as
+failures; switching away in anger still counts as a rejection.
 Friction alone rewards a model that is pleasant but never finishes; Ships alone ignores what it cost you
 to get there. The chart plots the two against each other.
 

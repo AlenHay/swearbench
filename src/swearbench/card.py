@@ -1,10 +1,9 @@
-"""Shareable SVG card. Model names and numbers only; never quotes."""
+"""Leaderboard card, styled to match chart.svg. Model names and numbers only; never quotes."""
 from __future__ import annotations
 
 from html import escape
 
-from .chart import pretty
-
+from .chart import FAMILIES, PAD, STYLE, _text_w, family, pretty
 
 MODE_LABEL = {
     "fabrication": "lies", "overreach": "overreach", "giving_up": "gave up", "regression": "breaks things",
@@ -12,42 +11,56 @@ MODE_LABEL = {
     "profanity": "swearing", "shouting": "CAPS", "sarcasm": "sarcasm", "slow": "slow",
 }
 
-
-PAD = 28
-RANK_END = PAD + 12
+W = 760
+TOP = 120
+ROW_H = 40
+RANK_END = PAD + 16
 NAME_X = RANK_END + 14
-BAR_W = 280
-SCORE_END = NAME_X + BAR_W + 48
+BAR_X = NAME_X + 160
+BAR_W = 180
+SCORE_END = BAR_X + BAR_W + 40
 STATS_X = SCORE_END + 24
-STATS_W = 164
-W = STATS_X + STATS_W + PAD
-ROW_H = 48
-TOP = 96
 
 
 def svg(res, rows=8):
     board = res["board"][:rows]
-    h = TOP + ROW_H * max(len(board), 1) + 36
-    lo = min([s["score"] for s in board] + [0])
+    h = TOP + ROW_H * max(len(board), 1) + PAD + 20
     hi = max([s["score"] for s in board] + [1])
-    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{h}" viewBox="0 0 {W} {h}" '
-           'font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif">',
-           f'<rect width="{W}" height="{h}" rx="14" fill="#0d1117"/>',
-           f'<text x="{PAD}" y="46" font-size="24" font-weight="700" fill="#f0f6fc">SwearBench</text>',
-           f'<text x="{PAD}" y="70" font-size="13" fill="#8b949e">{res["n_reactions"]} reactions</text>']
+    o = [f'<svg xmlns="http://www.w3.org/2000/svg" class="c" width="{W}" height="{h}" viewBox="0 0 {W} {h}" '
+         'role="img" aria-label="SwearBench leaderboard">',
+         f"<style>{STYLE}</style>",
+         f'<rect width="{W}" height="{h}" rx="14" fill="var(--surface)"/>',
+         f'<text x="{PAD}" y="{PAD + 18}" font-size="20" font-weight="700" fill="var(--ink)">SwearBench</text>']
+
+    lx, ly = PAD, PAD + 52
+    for i, (name, _) in enumerate(FAMILIES):
+        o.append(f'<circle cx="{lx + 5}" cy="{ly - 4}" r="5" fill="var(--s{i + 1})"/>'
+                 f'<text x="{lx + 15}" y="{ly}" font-size="12" fill="var(--ink2)">{name}</text>')
+        lx += 15 + _text_w(name) + 24
+    o.append(f'<text x="{W - PAD}" y="{ly}" font-size="12" fill="var(--muted)" text-anchor="end">'
+             f'{res["n_reactions"]} reactions</text>')
+
     for i, s in enumerate(board):
         y = TOP + i * ROW_H
-        text_y, bar_y, sub_y = y + 14, y + 24, y + 32
-        frac = (s["score"] - lo) / ((hi - lo) or 1)
+        mid = y + ROW_H / 2
+        base = mid + 4.5
+        col = f"var(--s{family(s['model']) + 1})"
         top_mode = max(s["modes"], key=s["modes"].get) if s["modes"] else None
-        color = "#3fb950" if i == 0 else "#f85149" if i == len(board) - 1 and len(board) > 1 else "#58a6ff"
-        out += [f'<text x="{RANK_END}" y="{text_y}" font-size="14" fill="#8b949e" text-anchor="end">{i + 1}</text>',
-                f'<text x="{NAME_X}" y="{text_y}" font-size="15" font-weight="600" fill="#f0f6fc">{escape(pretty(s["model"]))}</text>',
-                f'<rect x="{NAME_X}" y="{bar_y}" width="{BAR_W}" height="6" rx="3" fill="#21262d"/>',
-                f'<rect x="{NAME_X}" y="{bar_y}" width="{max(6, BAR_W * frac):.0f}" height="6" rx="3" fill="{color}"/>',
-                f'<text x="{SCORE_END}" y="{text_y}" font-size="16" font-weight="700" fill="{color}" '
-                f'text-anchor="end" font-variant-numeric="tabular-nums">{s["score"]:.0f}</text>',
-                f'<text x="{STATS_X}" y="{text_y}" font-size="12" fill="#c9d1d9">ships {s["outcome"]:.0f}% · {s["angry_pct"]:.0f}% angry</text>',
-                f'<text x="{STATS_X}" y="{sub_y}" font-size="12" fill="#8b949e">{MODE_LABEL.get(top_mode, "")}</text>']
-    out.append(f'<text x="{PAD}" y="{h - 20}" font-size="11" fill="#6e7681">github.com/AlenHay/swearbench</text></svg>')
-    return "\n".join(out)
+        o += [f'<line x1="{PAD}" x2="{W - PAD}" y1="{y}" y2="{y}" stroke="var(--grid)" stroke-width="1"/>',
+              f'<text x="{RANK_END}" y="{base}" font-size="12" fill="var(--muted)" text-anchor="end">{i + 1}</text>',
+              f'<text x="{NAME_X}" y="{base}" font-size="13" font-weight="600" fill="var(--ink)">'
+              f'{escape(pretty(s["model"]))}</text>',
+              f'<rect x="{BAR_X}" y="{mid - 3}" width="{BAR_W}" height="6" rx="3" fill="var(--grid)"/>',
+              f'<rect x="{BAR_X}" y="{mid - 3}" width="{max(6, BAR_W * max(s["score"], 0) / hi):.0f}" height="6" '
+              f'rx="3" fill="{col}"/>',
+              f'<text x="{SCORE_END}" y="{base}" font-size="13" font-weight="700" fill="var(--ink)" '
+              f'text-anchor="end" font-variant-numeric="tabular-nums">{s["score"]:.0f}</text>',
+              f'<text x="{STATS_X}" y="{base}" font-size="12" fill="var(--ink2)">'
+              f'ships {s["outcome"]:.0f}% · {s["angry_pct"]:.0f}% angry</text>',
+              f'<text x="{W - PAD}" y="{base}" font-size="12" fill="var(--muted)" text-anchor="end">'
+              f'{MODE_LABEL.get(top_mode, "")}</text>']
+    end = TOP + ROW_H * len(board)
+    o.append(f'<line x1="{PAD}" x2="{W - PAD}" y1="{end}" y2="{end}" stroke="var(--axis)" stroke-width="1"/>')
+    o.append(f'<text x="{PAD}" y="{h - PAD}" font-size="11" fill="var(--muted)">github.com/AlenHay/swearbench</text>')
+    o.append("</svg>")
+    return "\n".join(o)

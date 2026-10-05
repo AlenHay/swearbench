@@ -7,24 +7,24 @@
 text{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 </style>
 <title id="t">SwearBench: how much swearing gets you what result</title>
-<desc id="d">claude-opus-5-5: rage 84 per 100 turns, 62% of sessions land; claude-opus-5: rage 79 per 100 turns, 41% of sessions land; gpt-5.5: rage 101 per 100 turns, 50% of sessions land; gpt-5.6-sol: rage 103 per 100 turns, 38% of sessions land; claude-fable-5: rage 86 per 100 turns, 26% of sessions land; gemini-3.8-flash-high: rage 107 per 100 turns, 29% of sessions land; claude-fable-5-1: rage 114 per 100 turns, 32% of sessions land</desc>
+<desc id="d">claude-opus-5-5: rage 76 per 100 turns, ships 83%; claude-opus-5: rage 95 per 100 turns, ships 74%; gemini-3.8-flash-high: rage 120 per 100 turns, ships 67%; gpt-5.5: rage 131 per 100 turns, ships 62%; claude-fable-5: rage 92 per 100 turns, ships 48%; gpt-5.6-sol: rage 123 per 100 turns, ships 55%; claude-fable-5-1: rage 149 per 100 turns, ships 64%</desc>
 <rect width="760" height="540" rx="14" fill="var(--surface)"/>
 <text x="32" y="50" font-size="20" font-weight="700" fill="var(--ink)">Swearing vs. result</text>
 <circle cx="37" cy="80" r="5" fill="var(--s1)"/><text x="47" y="84" font-size="12" fill="var(--ink2)">Claude</text>
 <circle cx="116.32000000000001" cy="80" r="5" fill="var(--s2)"/><text x="126.32000000000001" y="84" font-size="12" fill="var(--ink2)">GPT</text>
 <circle cx="175.48000000000002" cy="80" r="5" fill="var(--s3)"/><text x="185.48000000000002" y="84" font-size="12" fill="var(--ink2)">Other</text>
 <line x1="80.0" x2="80.0" y1="120" y2="464" stroke="var(--grid)" stroke-width="1"/>
-<text x="80.0" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">70</text>
+<text x="80.0" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">60</text>
 <line x1="209.6" x2="209.6" y1="120" y2="464" stroke="var(--grid)" stroke-width="1"/>
 <text x="209.6" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">80</text>
 <line x1="339.2" x2="339.2" y1="120" y2="464" stroke="var(--grid)" stroke-width="1"/>
-<text x="339.2" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">90</text>
+<text x="339.2" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">100</text>
 <line x1="468.8" x2="468.8" y1="120" y2="464" stroke="var(--grid)" stroke-width="1"/>
-<text x="468.8" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">100</text>
+<text x="468.8" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">120</text>
 <line x1="598.4" x2="598.4" y1="120" y2="464" stroke="var(--grid)" stroke-width="1"/>
-<text x="598.4" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">110</text>
+<text x="598.4" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">140</text>
 <line x1="728.0" x2="728.0" y1="120" y2="464" stroke="var(--grid)" stroke-width="1"/>
-<text x="728.0" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">120</text>
+<text x="728.0" y="486" font-size="11" fill="var(--muted)" text-anchor="middle">160</text>
 <line x1="80" x2="728" y1="464.0" y2="464.0" stroke="var(--grid)" stroke-width="1"/>
 <text x="68" y="468.0" font-size="11" fill="var(--muted)" text-anchor="end">0%</text>
 <line x1="80" x2="728" y1="395.2" y2="395.2" stroke="var(--grid)" stroke-width="1"/>
@@ -41,38 +41,38 @@ text{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 <text x="404.0" y="508" font-size="12" fill="var(--ink2)" text-anchor="middle">Swearing →</text>
 <text transform="translate(36 292.0) rotate(-90)" font-size="12" fill="var(--ink2)" text-anchor="middle">Shipped →</text>
 <g><title>claude-opus-5
-rage 79/100 turns · 22% angry msgs
-41% of 215 sessions land (90% CI 36–47%)
-SwearBench 38.9</title><line x1="194.8" x2="194.8" y1="302.4" y2="340.8" stroke="var(--s1)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="194.8" cy="321.6" r="22.0" fill="transparent"/><circle cx="194.8" cy="321.6" r="14.0" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/></g>
+rage 95/100 turns · 20% angry msgs
+ships 74% of 121 decided sessions (90% CI 67–81%)
+SwearBench 75.2</title><line x1="305.9" x2="305.9" y1="185.2" y2="233.7" stroke="var(--s1)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="305.9" cy="208.1" r="22.0" fill="transparent"/><circle cx="305.9" cy="208.1" r="14.0" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/></g>
 <g><title>claude-opus-5-5
-rage 84/100 turns · 33% angry msgs
-62% of 60 sessions land (90% CI 52–72%)
-SwearBench 40.9</title><line x1="258.4" x2="258.4" y1="217.5" y2="286.3" stroke="var(--s1)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="258.4" cy="251.9" r="17.8" fill="transparent"/><circle cx="258.4" cy="251.9" r="9.8" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/></g>
+rage 76/100 turns · 31% angry msgs
+ships 83% of 46 decided sessions (90% CI 73–91%)
+SwearBench 80.7</title><line x1="186.1" x2="186.1" y1="152.0" y2="213.2" stroke="var(--s1)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="186.1" cy="179.8" r="17.8" fill="transparent"/><circle cx="186.1" cy="179.8" r="9.8" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/></g>
 <g><title>claude-fable-5
-rage 86/100 turns · 29% angry msgs
-26% of 50 sessions land (90% CI 16–38%)
-SwearBench 25.3</title><line x1="290.8" x2="290.8" y1="333.3" y2="409.0" stroke="var(--s1)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="290.8" cy="374.6" r="17.3" fill="transparent"/><circle cx="290.8" cy="374.6" r="9.3" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/></g>
+rage 92/100 turns · 26% angry msgs
+ships 48% of 25 decided sessions (90% CI 33–67%)
+SwearBench 61.8</title><line x1="288.0" x2="288.0" y1="234.7" y2="349.3" stroke="var(--s1)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="288.0" cy="298.9" r="17.3" fill="transparent"/><circle cx="288.0" cy="298.9" r="9.3" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/></g>
 <g><title>gpt-5.6-sol
-rage 103/100 turns · 31% angry msgs
-38% of 39 sessions land (90% CI 26–51%)
-SwearBench 26.5</title><line x1="505.1" x2="505.1" y1="287.6" y2="375.8" stroke="var(--s2)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="505.1" cy="331.7" r="16.8" fill="transparent"/><circle cx="505.1" cy="331.7" r="8.8" fill="var(--s2)" stroke="var(--surface)" stroke-width="2"/></g>
+rage 123/100 turns · 22% angry msgs
+ships 55% of 20 decided sessions (90% CI 37–71%)
+SwearBench 61.7</title><line x1="491.2" x2="491.2" y1="221.2" y2="337.3" stroke="var(--s2)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="491.2" cy="274.8" r="16.8" fill="transparent"/><circle cx="491.2" cy="274.8" r="8.8" fill="var(--s2)" stroke="var(--surface)" stroke-width="2"/></g>
 <g><title>claude-fable-5-1
-rage 114/100 turns · 41% angry msgs
-32% of 19 sessions land (90% CI 16–47%)
-SwearBench 14.3</title><line x1="643.9" x2="643.9" y1="301.1" y2="409.7" stroke="var(--s1)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="643.9" cy="355.4" r="15.7" fill="transparent"/><circle cx="643.9" cy="355.4" r="7.7" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/></g>
+rage 149/100 turns · 44% angry msgs
+ships 64% of 11 decided sessions (90% CI 38–87%)
+SwearBench 61.3</title><line x1="657.2" x2="657.2" y1="165.9" y2="331.7" stroke="var(--s1)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="657.2" cy="245.1" r="15.7" fill="transparent"/><circle cx="657.2" cy="245.1" r="7.7" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/></g>
 <g><title>gemini-3.8-flash-high
-rage 107/100 turns · 27% angry msgs
-29% of 14 sessions land (90% CI 7–50%)
-SwearBench 22.8</title><line x1="557.7" x2="557.7" y1="292.0" y2="439.4" stroke="var(--s3)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="557.7" cy="365.7" r="15.3" fill="transparent"/><circle cx="557.7" cy="365.7" r="7.3" fill="var(--s3)" stroke="var(--surface)" stroke-width="2"/></g>
+rage 120/100 turns · 27% angry msgs
+ships 67% of 9 decided sessions (90% CI 40–90%)
+SwearBench 67.8</title><line x1="469.3" x2="469.3" y1="154.4" y2="326.4" stroke="var(--s3)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="469.3" cy="234.7" r="15.3" fill="transparent"/><circle cx="469.3" cy="234.7" r="7.3" fill="var(--s3)" stroke="var(--surface)" stroke-width="2"/></g>
 <g><title>gpt-5.5
-rage 101/100 turns · 30% angry msgs
-50% of 10 sessions land (90% CI 30–70%)
-SwearBench 32.2</title><line x1="483.4" x2="483.4" y1="223.2" y2="360.8" stroke="var(--s2)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="483.4" cy="292.0" r="14.9" fill="transparent"/><circle cx="483.4" cy="292.0" r="6.9" fill="var(--s2)" stroke="var(--surface)" stroke-width="2"/></g>
-<text x="216.8" y="325.6" font-size="12" fill="var(--ink)">Opus 5</text>
-<text x="276.1" y="255.9" font-size="12" fill="var(--ink)">Opus 5.5</text>
-<text x="308.2" y="378.6" font-size="12" fill="var(--ink)">Fable 5</text>
-<text x="522.0" y="335.7" font-size="12" fill="var(--ink)">GPT-5.6 Sol</text>
-<text x="659.6" y="359.4" font-size="12" fill="var(--ink)">Fable 5.1</text>
-<text x="434.9" y="369.7" font-size="12" fill="var(--ink)">Gemini 3.8 Flash</text>
-<text x="498.3" y="296.0" font-size="12" fill="var(--ink)">GPT-5.5</text>
+rage 131/100 turns · 22% angry msgs
+ships 62% of 8 decided sessions (90% CI 33–88%)
+SwearBench 64.2</title><line x1="539.5" x2="539.5" y1="163.0" y2="349.3" stroke="var(--s2)" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/><circle cx="539.5" cy="249.0" r="14.9" fill="transparent"/><circle cx="539.5" cy="249.0" r="6.9" fill="var(--s2)" stroke="var(--surface)" stroke-width="2"/></g>
+<text x="327.9" y="212.1" font-size="12" fill="var(--ink)">Opus 5</text>
+<text x="203.8" y="183.8" font-size="12" fill="var(--ink)">Opus 5.5</text>
+<text x="305.4" y="302.9" font-size="12" fill="var(--ink)">Fable 5</text>
+<text x="508.0" y="278.8" font-size="12" fill="var(--ink)">GPT-5.6 Sol</text>
+<text x="581.0" y="249.1" font-size="12" fill="var(--ink)">Fable 5.1</text>
+<text x="346.5" y="238.7" font-size="12" fill="var(--ink)">Gemini 3.8 Flash</text>
+<text x="477.5" y="253.0" font-size="12" fill="var(--ink)">GPT-5.5</text>
 </svg>

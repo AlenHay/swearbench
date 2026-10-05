@@ -8,44 +8,92 @@ from collections import Counter, defaultdict
 MODE_WEIGHT = {
     "fabrication": 3, "overreach": 3, "giving_up": 3, "regression": 2.5,
     "ignored": 2, "repeat": 2, "incomplete": 1.5, "insult": 1.5,
-    "profanity": 1, "shouting": 0.5, "sarcasm": 0.5, "slow": 0.5,
+    "profanity": 1, "shouting": 0.5, "sarcasm": 0.5, "slow": 0.5, "taste": 0.5,
 }
+BREACH = {"fabrication", "overreach", "giving_up", "regression", "ignored", "repeat", "incomplete"}
+TASTE_DISCOUNT = 0.25
+FRICTION_K = 0.25
+REGRET_WINDOW_DAYS = 7
 INTERRUPT_RAGE = 1.5
 SWEAR = re.compile(r"\b(fuck\w*|shit\w*|wtf|damn\w*|crap\w*|bullshit|stupid|idiot\w*|dumb\w*|moron\w*|"
                    r"bitch\w*|asshole|sucks?)\b", re.I)
 
 
 def rage(lab):
+    """Anger squared, so one blowup outweighs several grumbles, plus how you got mad.
+    Critique of taste while iterating, with no breach of trust, counts a quarter."""
     if lab.get("agent_authored") or lab.get("target") != "model" or lab.get("anger", 0) < 1:
         return 0.0
-    return lab["anger"] + sum(MODE_WEIGHT.get(m, 0) for m in lab.get("modes", []))
+    modes = set(lab.get("modes", []))
+    r = lab["anger"] ** 2 + sum(MODE_WEIGHT.get(m, 0) for m in modes)
+    return r * TASTE_DISCOUNT if "taste" in modes and not modes & BREACH else r
 
 
-def _friction(rows, n_int):
+def blame_shares(reactions, labels):
+    """For a complaint about earlier work, split it across the models that worked in the same workspace
+    in the week before, outside the current session, by how many turns each had there."""
+    import datetime as dt
+
+    def t(r):
+        return dt.datetime.fromisoformat(r.ts.replace("Z", "+00:00"))
+
+    by_ws = defaultdict(list)
+    for r in reactions:
+        if r.workspace and r.ts:
+            by_ws[r.workspace].append(r)
+    for rs in by_ws.values():
+        rs.sort(key=lambda r: r.ts)
+    shares = {}
+    window = dt.timedelta(days=REGRET_WINDOW_DAYS)
+    for r in reactions:
+        lab = labels.get(r.id)
+        if not lab or not lab.get("blames_earlier") or rage(lab) == 0 or not r.workspace:
+            continue
+        now = t(r)
+        prior = Counter(o.model for o in by_ws[r.workspace]
+                        if o.session != r.session and o.ts < r.ts and now - t(o) <= window and o.model)
+        total = sum(prior.values())
+        if total:
+            shares[r.id] = {m: n / total for m, n in prior.items()}
+    return shares
+
+
+def _own(r, l, shares):
+    return rage(l) * shares[r.id].get(r.model, 0.0) if r.id in shares else rage(l)
+
+
+def _friction(rows, n_int, shares, inbound_per_turn):
     n = len(rows)
-    total = sum(rage(l) for _, l in rows) + INTERRUPT_RAGE * n_int
+    total = sum(_own(r, l, shares) for r, l in rows) + inbound_per_turn * n + INTERRUPT_RAGE * n_int
     clean = sum(1 for _, l in rows if rage(l) == 0 and l.get("satisfaction", 0) >= 0)
     sat = sum(l.get("satisfaction", 0) for _, l in rows) / n
     rage100 = 100 * total / n
     clean_pct = 100 * clean / n
     return {
-        "n": n, "friction": clean_pct - 0.5 * rage100 + 10 * sat, "clean_pct": clean_pct, "rage100": rage100,
+        "n": n, "friction": 100 - FRICTION_K * rage100 + 10 * sat, "clean_pct": clean_pct, "rage100": rage100,
         "angry_pct": 100 * sum(rage(l) > 0 for _, l in rows) / n, "sat": sat,
         "int100": 100 * n_int / n,
         "swears100": 100 * sum(len(SWEAR.findall(r.text)) for r, _ in rows) / n,
     }
 
 
-def _landed(rows):
+def _verdict(rows):
+    """True = you accepted the work, False = you rejected it, None = it stopped or moved elsewhere without a verdict."""
     last = rows[-1][1]
-    return last.get("satisfaction", 0) >= 1 and rage(last) == 0
+    if rage(last) > 0 or last.get("satisfaction", 0) < 0:
+        return False
+    if last.get("satisfaction", 0) >= 1:
+        return True
+    return None
 
 
-def _stats(sessions, n_int, merged):
+def _stats(sessions, n_int, merged, shares, inbound_per_turn):
     rows = [x for s in sessions for x in s]
-    st = _friction(rows, n_int)
+    st = _friction(rows, n_int, shares, inbound_per_turn)
     st["sessions"] = len(sessions)
-    st["outcome"] = 100 * sum(_landed(s) for s in sessions) / len(sessions)
+    verdicts = [v for v in map(_verdict, sessions) if v is not None]
+    st["decided"] = len(verdicts)
+    st["outcome"] = 100 * sum(verdicts) / len(verdicts) if verdicts else 0.0
     tracked = [s for s in sessions if merged["since"] and s[0][0].ts >= merged["since"]]
     st["merged_n"] = len(tracked)
     st["merged_pct"] = 100 * sum(s[0][0].session in merged["ids"] for s in tracked) / len(tracked) if tracked else None
@@ -53,9 +101,10 @@ def _stats(sessions, n_int, merged):
     return st
 
 
-def _ci(sessions, n_int, merged, field, k=300):
+def _ci(sessions, n_int, merged, shares, inbound_per_turn, field, k=300):
     rng = random.Random(0)
-    xs = sorted(_stats(rng.choices(sessions, k=len(sessions)), n_int, merged)[field] for _ in range(k))
+    xs = sorted(_stats(rng.choices(sessions, k=len(sessions)), n_int, merged, shares, inbound_per_turn)[field]
+                for _ in range(k))
     return xs[int(k * .05)], xs[int(k * .95)]
 
 
@@ -76,6 +125,13 @@ def build(corpus, labels, min_reactions=40, exclude=()):
         if lab and not lab.get("agent_authored") and r.model and r.model not in exclude:
             per[r.model].append((r, lab))
     ints = Counter(i.model for i in corpus.interrupts)
+    shares = blame_shares(corpus.reactions, labels)
+    inbound = Counter()
+    for r in corpus.reactions:
+        if r.id in shares:
+            for m, share in shares[r.id].items():
+                if m != r.model:
+                    inbound[m] += rage(labels[r.id]) * share
 
     board = []
     for model, rows in per.items():
@@ -86,10 +142,14 @@ def build(corpus, labels, min_reactions=40, exclude=()):
             by_session[r.session].append((r, l))
         sessions = list(by_session.values())
         merged = {"ids": corpus.merged, "since": corpus.pr_tracking_since}
-        s = _stats(sessions, ints[model], merged)
+        inb = inbound[model] / len(rows)
+        s = _stats(sessions, ints[model], merged, shares, inb)
         s["model"], s["modes"] = model, modes_share(rows)
-        s["ci"] = _ci(sessions, ints[model], merged, "score")
-        s["outcome_ci"] = _ci(sessions, ints[model], merged, "outcome")
+        s["regret_in"], s["regret_out"] = inbound[model], sum(
+            rage(l) * (1 - shares[r.id].get(model, 0.0)) for r, l in rows if r.id in shares)
+        s["blowups"] = sum(1 for _, l in rows if rage(l) > 0 and l.get("anger", 0) >= 4)
+        s["ci"] = _ci(sessions, ints[model], merged, shares, inb, "score")
+        s["outcome_ci"] = _ci(sessions, ints[model], merged, shares, inb, "outcome")
         s["worst"] = [l for _, l in sorted(rows, key=lambda x: -rage(x[1]))[:3] if rage(l) > 0]
         board.append(s)
     board.sort(key=lambda s: -s["score"])
@@ -108,7 +168,7 @@ def build(corpus, labels, min_reactions=40, exclude=()):
         tokens.append({
             "model": model, "out_m": out_m, "agents_out_m": corpus.usage.tokens[model].get("agents", [0, 0, 0])[1] / 1e6,
             "total_b": sum(you) / 1e9, "n": len(win),
-            "rage_per_m": (sum(rage(l) for _, l in win) + INTERRUPT_RAGE * n_int) / out_m,
+            "rage_per_m": (sum(_own(r, l, shares) for r, l in win) + INTERRUPT_RAGE * n_int) / out_m,
             "angry_per_m": sum(rage(l) > 0 for _, l in win) / out_m, "out_per_reaction": you[1] / len(win),
         })
     tokens.sort(key=lambda t: t["rage_per_m"])
@@ -127,14 +187,16 @@ def _merged_cell(s):
 def markdown(res, quotes=True):
     o = ["# SwearBench\n",
          f"{res['n_reactions']} of your reactions to AI replies, {res['n_interrupts']} interrupts.\n",
-         "| # | Model | SwearBench ↑ | 90% CI | Lands | Friction | Sessions | Merged PR* | Reactions | Clean turns | Rage /100 turns | "
-         "Angry msgs | Interrupts /100 | Swears /100 | Avg satisfaction |",
-         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+         "| # | Model | SwearBench ↑ | 90% CI | Ships | Friction | Decided / sessions | Merged PR* | Reactions | Clean turns | "
+         "Rage /100 turns | Angry msgs | 4/4 blowups | Regret charged in / passed on | Interrupts /100 | Swears /100 | "
+         "Avg satisfaction |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for i, s in enumerate(res["board"], 1):
         o.append(f"| {i} | {s['model']} | **{s['score']:.1f}** | {s['ci'][0]:.0f}–{s['ci'][1]:.0f} | {s['outcome']:.0f}% | {s['friction']:.1f} | "
-                 f"{s['sessions']} | "
+                 f"{s['decided']} / {s['sessions']} | "
                  f"{_merged_cell(s)} | {s['n']} | "
-                 f"{s['clean_pct']:.0f}% | {s['rage100']:.1f} | {s['angry_pct']:.1f}% | {s['int100']:.1f} | "
+                 f"{s['clean_pct']:.0f}% | {s['rage100']:.1f} | {s['angry_pct']:.1f}% | {s['blowups']} | "
+                 f"{s['regret_in']:.0f} / {s['regret_out']:.0f} | {s['int100']:.1f} | "
                  f"{s['swears100']:.1f} | {s['sat']:+.2f} |")
     if res["tokens"]:
         o += ["\n## Per token of work\n",
@@ -160,9 +222,12 @@ def markdown(res, quotes=True):
         o.append("Too few reactions to rank: " + ", ".join(f"{m} ({n})" for m, n in res["small"]))
     if res["agent_only"]:
         o.append("\nOnly ever ran as subagents / headless runs (never ranked): " + ", ".join(res["agent_only"]))
-    o.append("\nSwearBench = (Friction + Lands) / 2. Friction = clean-turn % − 0.5 × rage per 100 turns + 10 × avg "
-             "satisfaction; rage = anger (1–4) + mode weights, only when aimed at the model; each interrupt adds 1.5. "
-             "Lands = % of sessions whose last reaction accepts the work. "
+    o.append(f"\nSwearBench = (Friction + Ships) / 2. Friction = 100 − {FRICTION_K} × rage per 100 turns + 10 × "
+             "avg satisfaction; rage = anger² + mode weights, only when aimed at the model, a quarter for taste-only "
+             "critique; each interrupt adds 1.5. Complaints about earlier work are charged to the models that worked "
+             f"in that workspace in the {REGRET_WINDOW_DAYS} days before. "
+             "Ships = accepted ÷ (accepted + rejected) sessions; sessions that stop or are handed off without a verdict "
+             "are left out, so limits and model switches don't count as failures. "
              "*Merged PR is informational (T3 Code only, sessions after it started tracking PRs) and not in the score. "
              "Intervals bootstrap over sessions. See chart.svg for swearing vs. result.")
     return "\n".join(o) + "\n"
