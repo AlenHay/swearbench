@@ -1,7 +1,7 @@
 [project]
 name = "swearbench"
-version = "0.1.0"
-description = "Rank AI coding models by how often they made you swear at them, from your own local chat logs."
+version = "0.2.0"
+description = "Rank AI coding models by how much they made you swear and how often their work shipped, from your own local chat logs."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"

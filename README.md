@@ -1,10 +1,12 @@
 # SwearBench
 
-**Which AI coding model made you swear the least?**
+**Which AI coding model made you swear the least, and still shipped?**
 
 Public benchmarks measure what models can do. SwearBench measures how they made *you* feel: it reads your
 own local agent logs, finds every message you sent in reaction to a model's reply, has an LLM judge label how
-mad you were and why, and ranks the models.
+mad you were and why, checks whether the work ended up accepted, and ranks the models.
+
+Example from the author's own logs (~4,600 messages, July–October 2026):
 
 ![swearing vs. result](docs/example-chart.svg)
 
@@ -105,6 +107,10 @@ Subagent token use is shown separately.
   did different work; the report tells you counts, not causes.
 - The judge is a model too. If it belongs to a family being ranked, SwearBench says so; re-run with another
   `--judge` and compare.
+- Regret attribution is a heuristic: it blames whoever worked in the same repo during the previous week,
+  not the session that actually introduced the problem.
+- The weights are opinions. Rage, taste and severity weights live at the top of `score.py`; change them
+  and re-run, labels are cached.
 - Deleted or rotated logs mean missing data, especially for the per-token view.
 - `report.md` quotes your own messages. Read it before you share it. The card and chart have no quotes.
 
