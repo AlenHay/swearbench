@@ -1,0 +1,5 @@
+swearbench-out/
+__pycache__/
+*.egg-info/
+dist/
+.venv/

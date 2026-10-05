@@ -1,0 +1,15 @@
+[project]
+name = "swearbench"
+version = "0.1.0"
+description = "Rank AI coding models by how often they made you swear at them, from your own local chat logs."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+swearbench = "swearbench.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
