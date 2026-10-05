@@ -6,7 +6,9 @@ Public benchmarks measure what models can do. SwearBench measures how they made 
 own local agent logs, finds every message you sent in reaction to a model's reply, has an LLM judge label how
 mad you were and why, and ranks the models.
 
-![example card](docs/example-card.svg)
+![swearing vs. result](docs/example-chart.svg)
+
+![leaderboard card](docs/example-card.svg)
 
 ## Run it
 
@@ -14,7 +16,7 @@ mad you were and why, and ranks the models.
 uvx --from git+https://github.com/AlenHay/swearbench swearbench
 ```
 
-It prints a leaderboard and writes `swearbench-out/report.md`, `card.svg` and `results.json`.
+It prints a leaderboard and writes `swearbench-out/report.md`, `chart.svg` (swearing vs. result), `card.svg` and `results.json`.
 Before anything leaves your machine it tells you how many messages it will send to the judge and asks.
 
 | Flag | |
@@ -62,12 +64,21 @@ Every message you send is charged to the model whose reply you were answering. T
 
 Rage for a message = anger + mode weights, when aimed at the model. Each interrupt adds 1.5.
 
+The headline is half friction, half result:
+
 ```
-SwearBench = clean-turn % − 0.5 × rage per 100 turns + 10 × average satisfaction
+Friction   = clean-turn % − 0.5 × rage per 100 turns + 10 × average satisfaction
+Ships      = % of sessions whose last reaction accepts the work
+SwearBench = (Friction + Ships) / 2
 ```
 
 A clean turn is one where your next message carries no anger at the model and doesn't reject its work.
-Scores come with a bootstrap 90% interval; models with fewer than 40 reactions aren't ranked.
+Friction alone rewards a model that is pleasant but never finishes; Ships alone ignores what it cost you
+to get there. The chart plots the two against each other.
+
+Intervals are a 90% bootstrap over sessions; models with fewer than 40 reactions aren't ranked.
+With T3 Code, the report also shows the share of sessions that ended in a merged PR. It is informational
+only, since T3 records PRs only from when it started tracking them.
 
 **Per token of work.** If the logs carry token usage, the report adds a second ranking: rage per million output
 tokens the model produced in sessions you drove. A model that does twice the work per message gets credit for it.
@@ -80,7 +91,7 @@ Subagent token use is shown separately.
 - The judge is a model too. If it belongs to a family being ranked, SwearBench says so; re-run with another
   `--judge` and compare.
 - Deleted or rotated logs mean missing data, especially for the per-token view.
-- `report.md` quotes your own messages. Read it before you share it. The card has no quotes.
+- `report.md` quotes your own messages. Read it before you share it. The card and chart have no quotes.
 
 ## License
 

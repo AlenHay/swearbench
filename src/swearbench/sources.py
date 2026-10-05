@@ -52,6 +52,8 @@ class Corpus:
     interrupts: list = field(default_factory=list)
     usage: Usage = field(default_factory=Usage)
     found: list = field(default_factory=list)
+    merged: set = field(default_factory=set)
+    pr_tracking_since: str | None = None
 
 
 def norm(model):
@@ -266,6 +268,10 @@ def read_t3(corpus, db):
             current = turn_model.get(mid) or current
             sent[tid].append((ts, current))
             reply = ""
+    if _has(c, "projection_thread_pull_requests"):
+        corpus.merged |= {tid for tid, state in c.execute(
+            "select thread_id, json_extract(snapshot_json,'$.state') from projection_thread_pull_requests") if state == "merged"}
+        corpus.pr_tracking_since = c.execute("select min(linked_at) from projection_thread_pull_requests").fetchone()[0]
     for tid, ts in c.execute("select json_extract(payload_json,'$.threadId'), occurred_at from orchestration_events "
                              "where event_type='thread.turn-interrupt-requested'"):
         before = [m for t, m in sent.get(tid, []) if t <= ts]

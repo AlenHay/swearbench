@@ -21,7 +21,7 @@ def rage(lab):
     return lab["anger"] + sum(MODE_WEIGHT.get(m, 0) for m in lab.get("modes", []))
 
 
-def _stats(rows, n_int):
+def _friction(rows, n_int):
     n = len(rows)
     total = sum(rage(l) for _, l in rows) + INTERRUPT_RAGE * n_int
     clean = sum(1 for _, l in rows if rage(l) == 0 and l.get("satisfaction", 0) >= 0)
@@ -29,16 +29,33 @@ def _stats(rows, n_int):
     rage100 = 100 * total / n
     clean_pct = 100 * clean / n
     return {
-        "n": n, "score": clean_pct - 0.5 * rage100 + 10 * sat, "clean_pct": clean_pct, "rage100": rage100,
+        "n": n, "friction": clean_pct - 0.5 * rage100 + 10 * sat, "clean_pct": clean_pct, "rage100": rage100,
         "angry_pct": 100 * sum(rage(l) > 0 for _, l in rows) / n, "sat": sat,
         "int100": 100 * n_int / n,
         "swears100": 100 * sum(len(SWEAR.findall(r.text)) for r, _ in rows) / n,
     }
 
 
-def _ci(rows, n_int, k=300):
+def _landed(rows):
+    last = rows[-1][1]
+    return last.get("satisfaction", 0) >= 1 and rage(last) == 0
+
+
+def _stats(sessions, n_int, merged):
+    rows = [x for s in sessions for x in s]
+    st = _friction(rows, n_int)
+    st["sessions"] = len(sessions)
+    st["outcome"] = 100 * sum(_landed(s) for s in sessions) / len(sessions)
+    tracked = [s for s in sessions if merged["since"] and s[0][0].ts >= merged["since"]]
+    st["merged_n"] = len(tracked)
+    st["merged_pct"] = 100 * sum(s[0][0].session in merged["ids"] for s in tracked) / len(tracked) if tracked else None
+    st["score"] = (st["friction"] + st["outcome"]) / 2
+    return st
+
+
+def _ci(sessions, n_int, merged, field, k=300):
     rng = random.Random(0)
-    xs = sorted(_stats(rng.choices(rows, k=len(rows)), n_int)["score"] for _ in range(k))
+    xs = sorted(_stats(rng.choices(sessions, k=len(sessions)), n_int, merged)[field] for _ in range(k))
     return xs[int(k * .05)], xs[int(k * .95)]
 
 
@@ -64,8 +81,15 @@ def build(corpus, labels, min_reactions=40, exclude=()):
     for model, rows in per.items():
         if len(rows) < min_reactions:
             continue
-        s = _stats(rows, ints[model])
-        s["model"], s["ci"], s["modes"] = model, _ci(rows, ints[model]), modes_share(rows)
+        by_session = defaultdict(list)
+        for r, l in sorted(rows, key=lambda x: x[0].ts):
+            by_session[r.session].append((r, l))
+        sessions = list(by_session.values())
+        merged = {"ids": corpus.merged, "since": corpus.pr_tracking_since}
+        s = _stats(sessions, ints[model], merged)
+        s["model"], s["modes"] = model, modes_share(rows)
+        s["ci"] = _ci(sessions, ints[model], merged, "score")
+        s["outcome_ci"] = _ci(sessions, ints[model], merged, "outcome")
         s["worst"] = [l for _, l in sorted(rows, key=lambda x: -rage(x[1]))[:3] if rage(l) > 0]
         board.append(s)
     board.sort(key=lambda s: -s["score"])
@@ -96,14 +120,20 @@ def build(corpus, labels, min_reactions=40, exclude=()):
             "n_reactions": sum(len(r) for r in per.values()), "n_interrupts": len(corpus.interrupts)}
 
 
+def _merged_cell(s):
+    return "—" if s["merged_pct"] is None else f"{s['merged_pct']:.0f}% of {s['merged_n']}"
+
+
 def markdown(res, quotes=True):
     o = ["# SwearBench\n",
          f"{res['n_reactions']} of your reactions to AI replies, {res['n_interrupts']} interrupts.\n",
-         "| # | Model | SwearBench ↑ | 90% CI | Reactions | Clean turns | Rage /100 turns | Angry msgs | "
-         "Interrupts /100 | Swears /100 | Avg satisfaction |",
-         "|---|---|---|---|---|---|---|---|---|---|---|"]
+         "| # | Model | SwearBench ↑ | 90% CI | Lands | Friction | Sessions | Merged PR* | Reactions | Clean turns | Rage /100 turns | "
+         "Angry msgs | Interrupts /100 | Swears /100 | Avg satisfaction |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for i, s in enumerate(res["board"], 1):
-        o.append(f"| {i} | {s['model']} | **{s['score']:.1f}** | {s['ci'][0]:.0f}–{s['ci'][1]:.0f} | {s['n']} | "
+        o.append(f"| {i} | {s['model']} | **{s['score']:.1f}** | {s['ci'][0]:.0f}–{s['ci'][1]:.0f} | {s['outcome']:.0f}% | {s['friction']:.1f} | "
+                 f"{s['sessions']} | "
+                 f"{_merged_cell(s)} | {s['n']} | "
                  f"{s['clean_pct']:.0f}% | {s['rage100']:.1f} | {s['angry_pct']:.1f}% | {s['int100']:.1f} | "
                  f"{s['swears100']:.1f} | {s['sat']:+.2f} |")
     if res["tokens"]:
@@ -130,6 +160,9 @@ def markdown(res, quotes=True):
         o.append("Too few reactions to rank: " + ", ".join(f"{m} ({n})" for m, n in res["small"]))
     if res["agent_only"]:
         o.append("\nOnly ever ran as subagents / headless runs (never ranked): " + ", ".join(res["agent_only"]))
-    o.append("\nScore = clean-turn % − 0.5 × rage per 100 turns + 10 × avg satisfaction. "
-             "Rage = anger (1–4) + mode weights, only when aimed at the model; each interrupt adds 1.5.")
+    o.append("\nSwearBench = (Friction + Lands) / 2. Friction = clean-turn % − 0.5 × rage per 100 turns + 10 × avg "
+             "satisfaction; rage = anger (1–4) + mode weights, only when aimed at the model; each interrupt adds 1.5. "
+             "Lands = % of sessions whose last reaction accepts the work. "
+             "*Merged PR is informational (T3 Code only, sessions after it started tracking PRs) and not in the score. "
+             "Intervals bootstrap over sessions. See chart.svg for swearing vs. result.")
     return "\n".join(o) + "\n"

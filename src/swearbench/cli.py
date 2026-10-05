@@ -6,7 +6,7 @@ import json
 import os
 import sys
 
-from . import card, judge, score, sources
+from . import card, chart, judge, score, sources
 
 
 def main(argv=None):
@@ -64,10 +64,12 @@ def main(argv=None):
         f.write(report)
     with open(os.path.join(a.out, "card.svg"), "w") as f:
         f.write(card.svg(res))
+    with open(os.path.join(a.out, "chart.svg"), "w") as f:
+        f.write(chart.svg(res))
     with open(os.path.join(a.out, "results.json"), "w") as f:
         json.dump({k: v for k, v in res.items()}, f, indent=1, default=str)
     print(report.split("\n## ")[0])
-    print(f"Wrote {a.out}/report.md, card.svg, results.json", file=sys.stderr)
+    print(f"Wrote {a.out}/report.md, card.svg, chart.svg, results.json", file=sys.stderr)
     return 0
 
 
