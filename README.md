@@ -15,8 +15,10 @@ Example from the author's own logs (~4,600 messages, July–October 2026):
 ## Run it
 
 ```sh
-uvx --from git+https://github.com/AlenHay/swearbench swearbench
+uvx swearbench
 ```
+
+(or `pipx run swearbench`, or `pip install swearbench`)
 
 It prints a leaderboard and writes `swearbench-out/report.md`, `chart.svg` (swearing vs. result), `card.svg` and `results.json`.
 Before anything leaves your machine it tells you how many messages it will send to the judge and asks.
