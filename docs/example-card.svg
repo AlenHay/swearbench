@@ -1,61 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="492" viewBox="0 0 640 492" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif">
-<rect width="640" height="492" rx="14" fill="#0d1117"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="448" viewBox="0 0 640 448" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif">
+<rect width="640" height="448" rx="14" fill="#0d1117"/>
 <text x="28" y="44" font-size="24" font-weight="700" fill="#f0f6fc">SwearBench</text>
-<text x="28" y="68" font-size="13" fill="#8b949e">which AI made me swear the least · 4640 reactions</text>
+<text x="28" y="68" font-size="13" fill="#8b949e">which AI made me swear the least · 4582 reactions</text>
 <text x="28" y="110" font-size="14" fill="#8b949e">1</text>
-<text x="52" y="110" font-size="15" font-weight="600" fill="#f0f6fc">claude-opus-4-8</text>
+<text x="52" y="110" font-size="15" font-weight="600" fill="#f0f6fc">claude-opus-5</text>
 <rect x="52" y="118" width="300" height="6" rx="3" fill="#21262d"/>
 <rect x="52" y="118" width="300" height="6" rx="3" fill="#3fb950"/>
-<text x="372" y="112" font-size="15" font-weight="700" fill="#3fb950">40</text>
-<text x="420" y="106" font-size="12" fill="#c9d1d9">24% angry · 3 swears/100</text>
+<text x="372" y="112" font-size="15" font-weight="700" fill="#3fb950">36</text>
+<text x="420" y="106" font-size="12" fill="#c9d1d9">22% angry · 7 swears/100</text>
 <text x="420" y="122" font-size="12" fill="#8b949e">mostly: half-done</text>
 <text x="28" y="154" font-size="14" fill="#8b949e">2</text>
-<text x="52" y="154" font-size="15" font-weight="600" fill="#f0f6fc">claude-opus-5</text>
+<text x="52" y="154" font-size="15" font-weight="600" fill="#f0f6fc">claude-fable-5</text>
 <rect x="52" y="162" width="300" height="6" rx="3" fill="#21262d"/>
-<rect x="52" y="162" width="276" height="6" rx="3" fill="#58a6ff"/>
-<text x="372" y="156" font-size="15" font-weight="700" fill="#58a6ff">36</text>
-<text x="420" y="150" font-size="12" fill="#c9d1d9">22% angry · 7 swears/100</text>
+<rect x="52" y="162" width="210" height="6" rx="3" fill="#58a6ff"/>
+<text x="372" y="156" font-size="15" font-weight="700" fill="#58a6ff">25</text>
+<text x="420" y="150" font-size="12" fill="#c9d1d9">29% angry · 7 swears/100</text>
 <text x="420" y="166" font-size="12" fill="#8b949e">mostly: half-done</text>
 <text x="28" y="198" font-size="14" fill="#8b949e">3</text>
-<text x="52" y="198" font-size="15" font-weight="600" fill="#f0f6fc">claude-fable-5</text>
+<text x="52" y="198" font-size="15" font-weight="600" fill="#f0f6fc">claude-opus-5-5</text>
 <rect x="52" y="206" width="300" height="6" rx="3" fill="#21262d"/>
-<rect x="52" y="206" width="193" height="6" rx="3" fill="#58a6ff"/>
-<text x="372" y="200" font-size="15" font-weight="700" fill="#58a6ff">25</text>
-<text x="420" y="194" font-size="12" fill="#c9d1d9">29% angry · 7 swears/100</text>
+<rect x="52" y="206" width="176" height="6" rx="3" fill="#58a6ff"/>
+<text x="372" y="200" font-size="15" font-weight="700" fill="#58a6ff">20</text>
+<text x="420" y="194" font-size="12" fill="#c9d1d9">33% angry · 8 swears/100</text>
 <text x="420" y="210" font-size="12" fill="#8b949e">mostly: half-done</text>
 <text x="28" y="242" font-size="14" fill="#8b949e">4</text>
-<text x="52" y="242" font-size="15" font-weight="600" fill="#f0f6fc">claude-opus-5-5</text>
+<text x="52" y="242" font-size="15" font-weight="600" fill="#f0f6fc">gemini-3.8-flash-high</text>
 <rect x="52" y="250" width="300" height="6" rx="3" fill="#21262d"/>
-<rect x="52" y="250" width="162" height="6" rx="3" fill="#58a6ff"/>
-<text x="372" y="244" font-size="15" font-weight="700" fill="#58a6ff">20</text>
-<text x="420" y="238" font-size="12" fill="#c9d1d9">33% angry · 8 swears/100</text>
-<text x="420" y="254" font-size="12" fill="#8b949e">mostly: half-done</text>
+<rect x="52" y="250" width="152" height="6" rx="3" fill="#58a6ff"/>
+<text x="372" y="244" font-size="15" font-weight="700" fill="#58a6ff">17</text>
+<text x="420" y="238" font-size="12" fill="#c9d1d9">27% angry · 12 swears/100</text>
+<text x="420" y="254" font-size="12" fill="#8b949e">mostly: lies</text>
 <text x="28" y="286" font-size="14" fill="#8b949e">5</text>
-<text x="52" y="286" font-size="15" font-weight="600" fill="#f0f6fc">gemini-3.8-flash-high</text>
+<text x="52" y="286" font-size="15" font-weight="600" fill="#f0f6fc">gpt-5.6-sol</text>
 <rect x="52" y="294" width="300" height="6" rx="3" fill="#21262d"/>
-<rect x="52" y="294" width="140" height="6" rx="3" fill="#58a6ff"/>
-<text x="372" y="288" font-size="15" font-weight="700" fill="#58a6ff">17</text>
-<text x="420" y="282" font-size="12" fill="#c9d1d9">27% angry · 12 swears/100</text>
-<text x="420" y="298" font-size="12" fill="#8b949e">mostly: lies</text>
+<rect x="52" y="294" width="133" height="6" rx="3" fill="#58a6ff"/>
+<text x="372" y="288" font-size="15" font-weight="700" fill="#58a6ff">14</text>
+<text x="420" y="282" font-size="12" fill="#c9d1d9">31% angry · 8 swears/100</text>
+<text x="420" y="298" font-size="12" fill="#8b949e">mostly: overreach</text>
 <text x="28" y="330" font-size="14" fill="#8b949e">6</text>
-<text x="52" y="330" font-size="15" font-weight="600" fill="#f0f6fc">gpt-5.6-sol</text>
+<text x="52" y="330" font-size="15" font-weight="600" fill="#f0f6fc">gpt-5.5</text>
 <rect x="52" y="338" width="300" height="6" rx="3" fill="#21262d"/>
-<rect x="52" y="338" width="122" height="6" rx="3" fill="#58a6ff"/>
+<rect x="52" y="338" width="132" height="6" rx="3" fill="#58a6ff"/>
 <text x="372" y="332" font-size="15" font-weight="700" fill="#58a6ff">14</text>
-<text x="420" y="326" font-size="12" fill="#c9d1d9">31% angry · 8 swears/100</text>
-<text x="420" y="342" font-size="12" fill="#8b949e">mostly: overreach</text>
+<text x="420" y="326" font-size="12" fill="#c9d1d9">30% angry · 7 swears/100</text>
+<text x="420" y="342" font-size="12" fill="#8b949e">mostly: half-done</text>
 <text x="28" y="374" font-size="14" fill="#8b949e">7</text>
-<text x="52" y="374" font-size="15" font-weight="600" fill="#f0f6fc">gpt-5.5</text>
+<text x="52" y="374" font-size="15" font-weight="600" fill="#f0f6fc">claude-fable-5-1</text>
 <rect x="52" y="382" width="300" height="6" rx="3" fill="#21262d"/>
-<rect x="52" y="382" width="122" height="6" rx="3" fill="#58a6ff"/>
-<text x="372" y="376" font-size="15" font-weight="700" fill="#58a6ff">14</text>
-<text x="420" y="370" font-size="12" fill="#c9d1d9">30% angry · 7 swears/100</text>
-<text x="420" y="386" font-size="12" fill="#8b949e">mostly: half-done</text>
-<text x="28" y="418" font-size="14" fill="#8b949e">8</text>
-<text x="52" y="418" font-size="15" font-weight="600" fill="#f0f6fc">claude-fable-5-1</text>
-<rect x="52" y="426" width="300" height="6" rx="3" fill="#21262d"/>
-<rect x="52" y="426" width="6" height="6" rx="3" fill="#f85149"/>
-<text x="372" y="420" font-size="15" font-weight="700" fill="#f85149">-3</text>
-<text x="420" y="414" font-size="12" fill="#c9d1d9">41% angry · 7 swears/100</text>
-<text x="420" y="430" font-size="12" fill="#8b949e">mostly: makes me repeat</text>
-<text x="28" y="474" font-size="11" fill="#6e7681">github.com/AlenHay/swearbench · higher = fewer reasons to swear</text></svg>
+<rect x="52" y="382" width="6" height="6" rx="3" fill="#f85149"/>
+<text x="372" y="376" font-size="15" font-weight="700" fill="#f85149">-3</text>
+<text x="420" y="370" font-size="12" fill="#c9d1d9">41% angry · 7 swears/100</text>
+<text x="420" y="386" font-size="12" fill="#8b949e">mostly: makes me repeat</text>
+<text x="28" y="430" font-size="11" fill="#6e7681">github.com/AlenHay/swearbench · higher = fewer reasons to swear</text></svg>
